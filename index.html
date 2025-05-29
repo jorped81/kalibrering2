@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kalibreringsmodul</title>
+  <style>
+    html {
+      max-width: 100%;
+    }
+    body {
+      background-color: black;
+      color: #00ff00;
+      font-family: monospace;
+      padding: 2rem;
+      margin: auto;
+      width: 100%;
+      max-width: 600px;
+    }
+    input, button {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+      background-color: black;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+    }
+    button {
+      background-color: #00ff00;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .card {
+      border: 1px solid #00ff00;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    .highlight {
+      color: black;
+      background-color: #00ff00;
+      font-weight: bold;
+      padding: 0.5rem;
+      display: inline-block;
+      margin-top: 1rem;
+    }
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+    }
+    footer img {
+      max-width: 200px;
+      opacity: 0.85;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">== KALIBRERINGSMODUL ==</h1>
+
+  <div class="card">
+    <label>Fart i m/s:</label>
+    <input type="number" id="fart" step="any" onkeypress="enterHandler(event, 'tid')">
+    <label>Tid i sekunder:</label>
+    <input type="number" id="tid" step="any" onkeypress="enterHandler(event, 'teoretiskBtn')">
+    <button id="teoretiskBtn" onclick="kalkulerTeoretisk()">KALKULER TEORETISK DISTANSE</button>
+    <p id="teoretisk"></p>
+  </div>
+
+  <div class="card" id="målinger" style="display: none;">
+    <label>Første måling (meter):</label>
+    <input type="number" id="dist1" step="any" onkeypress="enterHandler(event, 'dist2')">
+    <label>Andre måling (meter):</label>
+    <input type="number" id="dist2" step="any" onkeypress="enterHandler(event, 'dist3')">
+    <label>Tredje måling (meter):</label>
+    <input type="number" id="dist3" step="any" onkeypress="enterHandler(event, 'kalkulerBtn')">
+    <button id="kalkulerBtn" onclick="kalkulerNyTid()">KALKULER NY TID</button>
+    <p id="gjennomsnitt"></p>
+    <p id="nytid"></p>
+    <p id="nytidUthevet"></p>
+  </div>
+
+  <footer>
+    <img src="logo2.png" alt="Logo">
+  </footer>
+
+  <script>
+    let fart = 0;
+    let tid = 0;
+    let teoretiskDistanse = 0;
+
+    function kalkulerTeoretisk() {
+      fart = parseFloat(document.getElementById("fart").value);
+      tid = parseFloat(document.getElementById("tid").value);
+      if (!isNaN(fart) && !isNaN(tid)) {
+        teoretiskDistanse = fart * tid;
+        document.getElementById("teoretisk").textContent = 
+          `>>> Teoretisk distanse: ${teoretiskDistanse.toFixed(2)} meter`;
+        document.getElementById("målinger").style.display = "block";
+        document.getElementById("dist1").focus();
+      }
+    }
+
+    function kalkulerNyTid() {
+      const dist1 = parseFloat(document.getElementById("dist1").value);
+      const dist2 = parseFloat(document.getElementById("dist2").value);
+      const dist3 = parseFloat(document.getElementById("dist3").value);
+
+      if (!isNaN(dist1) && !isNaN(dist2) && !isNaN(dist3)) {
+        const gjennomsnitt = (dist1 + dist2 + dist3) / 3;
+        const faktor = gjennomsnitt / teoretiskDistanse;
+        const nyTid = teoretiskDistanse / (fart * faktor);
+
+        document.getElementById("gjennomsnitt").textContent = 
+          `>>> Gjennomsnitt av målingene: ${gjennomsnitt.toFixed(2)} meter`;
+        document.getElementById("nytid").textContent = 
+          `>>> Gammel tid: ${tid.toFixed(2)} sek`;
+        document.getElementById("nytidUthevet").innerHTML = 
+          `<span class='highlight'>>> Ny anbefalt tid: ${nyTid.toFixed(2)} sek</span>`;
+      }
+    }
+
+    function enterHandler(event, nextId) {
+      if (event.key === "Enter") {
+        const next = document.getElementById(nextId);
+        if (next) next.focus();
+      }
+    }
+  </script>
+</body>
+</html>
